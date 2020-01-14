@@ -48,5 +48,15 @@
                 "date": "2019-03-01"
             }
         ]
+    },
+    {
+        "userId": "987",
+        "transactions": [
+            {
+                "amount": 11,
+                "description": "lorem ipsum",
+                "date": "2018-09-29"
+            }
+        ]
     }
 ]

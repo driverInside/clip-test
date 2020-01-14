@@ -1,5 +1,8 @@
 const fs = require('fs')
 const faker = require('faker')
+const request = require('supertest')
+const app = require('../app')
+
 const Transaction = require('../lib/transaction')
 const transaction = new Transaction()
 
@@ -245,6 +248,138 @@ describe('Transactions', () => {
         expect(endDate.getMonth()).toBe(1)
         expect(endDate.getDate()).toBe(7)
         expect(endDate.getFullYear()).toBe(2019)
+      })
+    })
+  })
+
+  describe('Transaction API', () => {
+    describe('GET /api/transactions', () => {
+      beforeAll(() => {
+        transaction.clearData()
+        loadReportExample()
+      })
+
+      it('should return two objects', async () => {
+        const res = await request(app)
+          .get('/api/transactions')
+
+        expect(res.statusCode).toBe(200)
+        expect(res.body).toHaveLength(2)
+      })
+    })
+
+    describe('POST /api/transactions', () => {
+      beforeAll(() => {
+        transaction.clearData()
+        loadReportExample()
+      })
+
+      it('should add a transaction to a specific user', async () => {
+        const res = await request(app)
+          .post('/api/transactions/987')
+          .send({
+            amount: 1.23,
+            description: 'Joes tacos',
+            date: '2018-12-30'
+          })
+        expect(res.statusCode).toBe(201)
+        expect(res.body).toHaveProperty('id')
+        expect(res.body).toHaveProperty('amount')
+        expect(res.body).toHaveProperty('date')
+        expect(res.body).toHaveProperty('description')
+      })
+    })
+
+    describe('GET /api/transactions/:userId', () => {
+      beforeAll(() => {
+        transaction.clearData()
+        loadReportExample()
+      })
+
+      it('should return an empty array', async () => {
+        const res = await request(app)
+          .get('/api/transactions/777')
+        
+        expect(res.statusCode).toBe(200)
+        expect(res.body).toHaveLength(0)
+      })
+
+      it('should return an array with an item', async () => {
+        const res = await request(app)
+          .get('/api/transactions/987')
+
+        expect(res.statusCode).toBe(200)
+        expect(res.body).toHaveLength(1)
+      })
+    })
+
+    describe('GET /api/transactions/:userId/:transactionsId', () => {
+      beforeAll(() => {
+        transaction.clearData()
+        loadReportExample()
+      })
+
+      it('should return not found', async () => {
+        const res = await request(app)
+          .get('/api/transactions/111/222')
+
+        expect(res.statusCode).toBe(404)
+      })
+
+      it('should return a single transaction', async () => {
+        const result = transaction.add(
+          '987',
+          123,
+          'Lorem ipsum',
+          new Date()
+        )
+
+        const res = await request(app)
+          .get('/api/transactions/987/' + result.id)
+
+        expect(res.statusCode).toBe(200)
+        expect(res.body).toHaveProperty('id')
+        expect(res.body).toHaveProperty('amount')
+        expect(res.body).toHaveProperty('description')
+        expect(res.body).toHaveProperty('date')
+      })
+    })
+
+    describe('GET /api/transactions/:userId/sum', () => {
+      beforeAll(() => {
+        transaction.clearData()
+        loadReportExample()
+      })
+
+      it('should return the sum of the amounts', async () => {
+        const res = await request(app)
+          .get('/api/transactions/987/sum')
+
+        expect(res.statusCode).toBe(200)
+        expect(res.body).toHaveProperty('userId')
+        expect(res.body).toHaveProperty('sum')
+      })
+    })
+
+    describe('GET /api/transactions/:userId/report', async () => {
+      beforeAll(() => {
+        transaction.clearData()
+        loadReportExample()
+      })
+
+      it('should generate the transaction report for a specific user', async () => {
+        const res = await request(app)
+          .get('/api/transactions/123/report')
+
+        expect(res.statusCode).toBe(200)
+        expect(res.body).toHaveLength(5)
+        for (const week of res.body) {
+          expect(week).toHaveProperty('weekStart')
+          expect(week).toHaveProperty('weekEnd')
+          expect(week).toHaveProperty('quantity')
+          expect(week).toHaveProperty('amount')
+          expect(week).toHaveProperty('totalAmount')
+        }
       })
     })
   })
