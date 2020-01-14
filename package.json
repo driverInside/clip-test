@@ -1,0 +1,31 @@
+{
+  "name": "clip-test",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "monitor": "nodemon ./bin/www",
+    "start": "node ./bin/www",
+    "test": "jest"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "coveragePathIgnorePatterns": [
+      "/node_modules/"
+    ]
+  },
+  "dependencies": {
+    "cookie-parser": "~1.4.4",
+    "debug": "~2.6.9",
+    "express": "~4.16.1",
+    "moment": "^2.24.0",
+    "morgan": "~1.9.1",
+    "uuid": "^3.3.3"
+  },
+  "devDependencies": {
+    "faker": "^4.1.0",
+    "jest": "^24.9.0",
+    "nodemon": "^2.0.2",
+    "standard": "^14.3.1",
+    "supertest": "^4.0.2"
+  }
+}
